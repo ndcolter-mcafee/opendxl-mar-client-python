@@ -11,7 +11,7 @@ class MockMarServer(object):
             "/opendxl/mockmarserver"
         )
 
-    def start_service(self):
+    def __enter__(self):
         mock_callback = FakeMarApiSearchRequestCallback(self._client)
 
         self._service_registration_info.add_topic(
@@ -23,5 +23,7 @@ class MockMarServer(object):
 
         self._client.register_service_sync(self._service_registration_info, 10)
 
-    def stop_service(self):
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
         self._client.unregister_service_sync(self._service_registration_info, 10)

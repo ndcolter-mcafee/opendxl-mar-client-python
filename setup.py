@@ -31,7 +31,7 @@ class LintCommand(Command):
     def run(self):
         self.announce("Running pylint for library source files and tests",
                       level=distutils.log.INFO)
-        subprocess.check_call(["pylint", "dxlmarclient"] + glob.glob("*.py"))
+        subprocess.check_call(["pylint", "dxlmarclient", "tests"] + glob.glob("*.py"))
         self.announce("Running pylint for samples", level=distutils.log.INFO)
         subprocess.check_call(["pylint"] + glob.glob("sample/*.py") +
                               glob.glob("sample/**/*.py") +
@@ -51,8 +51,9 @@ class CiCommand(Command):
         pass
     def run(self):
         self.run_command("lint")
+        self.run_command("test")
 
-TEST_REQUIREMENTS = ["pylint"]
+TEST_REQUIREMENTS = ["nose", "pylint"]
 
 DEV_REQUIREMENTS = TEST_REQUIREMENTS + ["sphinx"]
 
@@ -76,12 +77,15 @@ setup(
         "test": TEST_REQUIREMENTS
     },
 
-    # Application author details:
+    test_suite="nose.collector",
+
+    # Package author details:
     author="McAfee LLC",
 
     # License
     license="Apache License 2.0",
 
+    # Keywords
     keywords=['opendxl', 'dxl', 'mcafee', 'client', 'mar'],
 
     # Packages
@@ -107,7 +111,6 @@ setup(
         "Development Status :: 4 - Beta",
         "Topic :: Software Development :: Libraries :: Python Modules",
         "License :: OSI Approved :: Apache Software License",
-        "Programming Language :: Python",
         "Programming Language :: Python :: 2",
         "Programming Language :: Python :: 2.7",
         "Programming Language :: Python :: 3",

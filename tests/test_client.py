@@ -1,9 +1,9 @@
 from dxlmarclient import *
-from tests.test_base import BaseMarClientTest
+from tests.test_base import BaseClientTest
 from tests.test_value_constants import *
 from tests.mock_marserver import MockMarServer
 
-class TestApiSearch(BaseMarClientTest):
+class TestApiSearch(BaseClientTest):
 
     def test_search(self):
         search_expected_results = {
@@ -28,31 +28,28 @@ class TestApiSearch(BaseMarClientTest):
         with self.create_client(max_retries=0) as dxl_client:
             # Set up client, and register mock service
             mar_client = MarClient(dxl_client)
-            mock_mar_server = MockMarServer(dxl_client)
             dxl_client.connect()
-            mock_mar_server.start_service()
+            with MockMarServer(dxl_client):
 
-            result_context = \
-                mar_client.search(
-                    projections=[{
-                        "name": "HostInfo",
-                        "outputs": ["ip_address"]
-                    }]
+                result_context = \
+                    mar_client.search(
+                        projections=[{
+                            "name": "HostInfo",
+                            "outputs": ["ip_address"]
+                        }]
+                    )
+
+                results_dict = result_context.get_results()
+
+                for item_index in results_dict["items"]:
+                    if "created_at" in item_index:
+                        item_index.pop("created_at", None)
+
+                self.assertDictEqual(
+                    results_dict,
+                    search_expected_results
                 )
 
-            results_dict = result_context.get_results()
-
-            for item_index in results_dict["items"]:
-                if "created_at" in item_index:
-                    item_index.pop("created_at", None)
-
-            self.assertDictEqual(
-                results_dict,
-                search_expected_results
-            )
-
-            # End test
-            mock_mar_server.stop_service()
             dxl_client.disconnect()
 
     def test_invokesearchapi(self):
@@ -66,23 +63,19 @@ class TestApiSearch(BaseMarClientTest):
         with self.create_client(max_retries=0) as dxl_client:
             # Set up client, and register mock service
             mar_client = MarClient(dxl_client)
-            mock_mar_server = MockMarServer(dxl_client)
             dxl_client.connect()
-            mock_mar_server.start_service()
+            with MockMarServer(dxl_client):
+                response_dict = mar_client._invoke_mar_search_api(MAR_DIRECT_INVOKE_SEARCH_POST)
 
-            response_dict = mar_client._invoke_mar_search_api(MAR_DIRECT_INVOKE_SEARCH_POST)
+                self.assertDictEqual(
+                    response_dict,
+                    direct_invoke_search_expected
+                )
 
-            self.assertDictEqual(
-                response_dict,
-                direct_invoke_search_expected
-            )
-
-            # End test
-            mock_mar_server.stop_service()
             dxl_client.disconnect()
 
 
-class TestPollInterval(BaseMarClientTest):
+class TestPollInterval(BaseClientTest):
 
     def test_pollinterval(self):
         with self.create_client(max_retries=0) as dxl_client:
