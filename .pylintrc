@@ -134,7 +134,7 @@ disable=print-statement,
         too-many-arguments,
         missing-docstring,
         protected-access,
-        line-too-long
+        useless-object-inheritance
 
 
 # Enable the message, report, category or checker with the given id(s). You can
@@ -268,7 +268,7 @@ method-naming-style=snake_case
 
 # Regular expression matching correct method names. Overrides method-naming-
 # style
-method-rgx=
+#method-rgx=
 
 # Naming style matching correct module names
 module-naming-style=snake_case
